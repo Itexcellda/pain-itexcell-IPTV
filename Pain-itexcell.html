@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #141414;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #container {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #111;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        input[type="text"],
+        select,
+        textarea,
+        input[type="url"] {
+            width: calc(100% - 12px);
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #e50914;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        button[type="reset"] {
+            margin-left: 10px;
+            background-color: #333;
+        }
+
+        button:hover {
+            background-color: #ff0f24;
+        }
+
+        button[type="reset"]:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Crie Uma Lista</h1>
+        <label for="nome">NOME</label>
+        <input type="text" id="nome" pattern="[A-Z\s]+" required>
+        <label for="categoria">CATEGORIA</label>
+        <select name="Categoria" id="categoria">
+            <option value="LIVESTREAM">LIVESTREAM</option>
+            <option value="FILMES">FILMES</option>
+            <option value="SÉRIES">SÉRIES</option>
+        </select>
+        <label for="linklogo">LINK DA LOGO</label>
+        <input type="url" id="linklogo" required pattern="https?://.+">
+        <label for="linkurl">URL DO VÍDEO</label>
+        <input type="url" id="linkurl" required pattern="https?://.+">
+        <button type="button" onclick="adicionarPlaylist()">Criar</button>
+        <button type="button" onclick="salvarArquivo()">Salvar Arquivo</button>
+        <button type="button" onclick="desfazerTudo()">Desfazer</button>
+        <textarea id="playlistField" rows="10" style="width: calc(100% - 12px); margin-top: 15px;"></textarea>
+        <a id="downloadLink" style="display: none"></a>
+    </div>
+
+    <script>
+        var playlist = '';
+        var firstPlaylist = true;
+
+        function adicionarPlaylist() {
+            var nome = document.getElementById('nome').value.toUpperCase();
+            var categoria = document.getElementById('categoria').value;
+            var linkLogo = document.getElementById('linklogo').value;
+            var linkVideo = document.getElementById('linkurl').value;
+
+            if (nome && categoria && linkLogo && linkVideo) {
+                var playlistEntry;
+                if (firstPlaylist) {
+                    playlistEntry = `#EXTM3U\n#EXTINF:-1 tvg-name="${nome}" tvg-logo="${linkLogo}" group-title="${categoria}",${nome}\n${linkVideo}\n`;
+                    firstPlaylist = false;
+                } else {
+                    playlistEntry = `#EXTINF:-1 tvg-name="${nome}" tvg-logo="${linkLogo}" group-title="${categoria}",${nome}\n${linkVideo}\n`;
+                }
+
+                playlist += playlistEntry;
+                document.getElementById('playlistField').value = playlist;
+                limparCampos();
+            } else {
+                alert('Preencha todos os campos para criar o código da lista.');
+            }
+        }
+
+        function salvarArquivo() {
+            if (playlist) {
+                var nomeArquivo = prompt("Digite o nome do arquivo a ser salvo:", "playlist.m3u");
+
+                if (nomeArquivo != null && nomeArquivo !== "") {
+                    var blob = new Blob([playlist], { type: 'text/plain' });
+                    var url = URL.createObjectURL(blob);
+
+                    var downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = nomeArquivo;
+                    downloadLink.click();
+                }
+            } else {
+                alert('Crie um código da lista antes de salvar.');
+            }
+        }
+
+        function limparCampos() {
+            document.getElementById('nome').value = '';
+            document.getElementById('categoria').selectedIndex = 0;
+            document.getElementById('linklogo').value = '';
+            document.getElementById('linkurl').value = '';
+        }
+
+        function desfazerTudo() {
+            document.getElementById('playlistField').value = '';
+            playlist = '';
+            firstPlaylist = true;
+            limparCampos();
+        }
+    </script>
+</body>
+</html>
